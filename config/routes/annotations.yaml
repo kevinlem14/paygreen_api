@@ -1,0 +1,13 @@
+no_versionning:
+    resource: '../../src/Controller/'
+    type: annotation
+
+v1:
+    resource: '../../src/Controller/v1/'
+    type: annotation
+    prefix: '/v1'
+    name_prefix: 'v1_'
+
+kernel:
+    resource: '../../src/Kernel.php'
+    type: annotation

@@ -1,0 +1,41 @@
+server {
+    listen 80;
+
+    root /var/www/html/public;
+    index index.php;
+    charset utf-8;
+    client_max_body_size 0;
+    fastcgi_buffers 16 16k;
+    fastcgi_buffer_size 32k;
+
+    location / {
+        try_files $uri @rewriteapp;
+    }
+
+    location @rewriteapp {
+        rewrite ^(.*)$ /index.php/$1 last;
+    }
+
+    location ~ ^/index\.php(/|$) {
+        fastcgi_pass %fastcgi_pass%:9000;
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        internal;
+    }
+
+    # return 404 for all other php files not matching the front controller
+    # this prevents access to other php files you don't want to be accessible.
+    location ~ \.php$ {
+        return 404;
+    }
+
+    # Specify what happens what .ht files are requested
+    location ~ /\.ht {
+        deny all;
+    }
+
+    error_log /dev/stderr;
+    access_log /dev/stdout;
+}
