@@ -1,9 +1,9 @@
 no_versionning:
-    resource: '../../src/Controller/'
+    resource: '../../src/Controller/*'
     type: annotation
 
 v1:
-    resource: '../../src/Controller/v1/'
+    resource: '../../src/Controller/v1/*'
     type: annotation
     prefix: '/v1'
     name_prefix: 'v1_'
