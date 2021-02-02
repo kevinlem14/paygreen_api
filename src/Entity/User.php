@@ -56,6 +56,11 @@ class User implements UserInterface
         $this->transactions = new ArrayCollection();
     }
 
+    public function __toString()
+    {
+        return $this->getEmail();
+    }
+
 
     public function getId(): ?int
     {

@@ -6,8 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 
 abstract class BaseController extends AbstractController
 {
@@ -24,6 +23,9 @@ abstract class BaseController extends AbstractController
     // Entity class name.
     protected $className;
 
+    // Entity form name.
+    protected $formName;
+
     /**
      * BaseController constructor.
      * @param $serializer
@@ -39,7 +41,39 @@ abstract class BaseController extends AbstractController
         $repo = $this->em->getRepository($this->className);
         $data = $repo->findAll();
 
-        return new JsonResponse($this->serializer->toArray(['data' => $data], $this->buildJmsContext()), Response::HTTP_OK);
+        return $this->serializer->toArray(['data' => $data], $this->buildJmsContext());
+    }
+
+    protected function create(Request $request)
+    {
+        $entity = new $this->className;
+        $form = $this->createForm(
+            $this->formName,
+            $entity,
+            [
+                'method' => 'POST'
+            ]
+        );
+
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid()){
+            $this->em->persist($entity);
+            $this->em->flush();
+
+            return $this->serializer->toArray(['data' => $entity], $this->buildJmsContext());
+        }
+
+        $errors = [];
+        if(!$form->isSubmitted()){
+            $errors['form'] = 'No data received';
+        }
+        foreach ($form as $child){
+            foreach ($child->getErrors(true) as $error){
+                $errors[$child->getName()] = $error->getMessage();
+            }
+        }
+
+        return ['errors' => $errors];
     }
 
     /**
