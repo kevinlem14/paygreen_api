@@ -29,7 +29,7 @@ class TransactionController extends BaseController
     {
         $data = $this->create($request);
         $code = (isset($data['errors'])) ? Response::HTTP_BAD_REQUEST : Response::HTTP_OK;
-
+        
         return new JsonResponse($data, $code);
     }
 }
